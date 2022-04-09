@@ -4,7 +4,9 @@ const UsersController = require('../controllers/users')
 router.route('/get').get(UsersController.get)
 router.route('/getByUsername').get(UsersController.getByUsername)
 router.route('/post').post(UsersController.post)
-router.route('/update').post(UsersController.update)
+router.route('/updateUser').put(UsersController.updateUser)
 router.route('/delete').get(UsersController.delete)
+
+router.route('/calculateRewards').get(UsersController.calculateRewards)
 
 module.exports = router

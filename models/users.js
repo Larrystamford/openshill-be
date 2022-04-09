@@ -4,11 +4,11 @@ const usersModel = {
   twitterUsername: '',
   twitterProfilePic: '',
   twitterProfilePicBackground: '',
-  walletsAddress: '',
-  amountEarned: 0,
-  amountClaimed: 0,
+  walletAddress: '',
   location: '',
   description: '',
+  totalAmountEarned: 0, // virtual money
+  totalAmountClaimed: 0, // sent from contract to user
 }
 
 module.exports = { usersModel }

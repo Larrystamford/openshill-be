@@ -43,8 +43,7 @@ passport.use(
           twitterId: profile.id,
           twitterUsername: profile.username,
           twitterProfilePic: profile._json.profile_image_url_https,
-          twitterProfilePicBackground:
-            profile._json.profile_background_image_url_https,
+          twitterProfilePicBackground: profile._json.profile_banner_url,
           walletsAddress: '',
           amountEarned: 0,
           amountClaimed: 0,
@@ -60,18 +59,12 @@ passport.use(
           twitterId: profile.id,
           twitterUsername: profile.username,
           twitterProfilePic: profile._json.profile_image_url_https,
-          twitterProfilePicBackground:
-            profile._json.profile_background_image_url_https,
+          twitterProfilePicBackground: profile._json.profile_banner_url,
           location: profile._json.location,
           twitterDescription: profile._json.description,
         })
       }
 
-      // const querySnapshot2 = await getDocs(q)
-      // querySnapshot2.forEach((doc) => {
-      //   user = doc.data()
-      //   user.id = doc.id
-      // })
       ref = doc(db, 'users', existingDocId)
       const docSnap = await getDoc(ref)
 

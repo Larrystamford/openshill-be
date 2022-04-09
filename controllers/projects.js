@@ -12,6 +12,7 @@ const {
   arrayUnion,
   arrayRemove,
 } = require('firebase/firestore')
+const { projectsModel } = require('../models/projects')
 
 const Web3 = require('web3')
 const Provider = require('@truffle/hdwallet-provider')
@@ -32,25 +33,28 @@ module.exports = {
     }))
     res.send(list)
   },
-  getByProjectUnqiueName: async (req, res, next) => {
-    const { name } = req.query
+  getByProjectByUserName: async (req, res, next) => {
+    const { username } = req.query
     const ref = collection(db, 'projects')
-    const q = query(ref, where('name', '==', name))
+    const q = query(ref, where('username', '==', username))
 
+    let project = {}
     const querySnapshot = await getDocs(q)
     querySnapshot.forEach((doc) => {
       //   console.log(doc.ref) // how to convert query back to ref
-      res.send({ id: doc.id, ...doc.data() })
+      project = doc.data()
+      project.id = doc.id
     })
+    res.send(project)
   },
   createProject: async (req, res, next) => {
     try {
       const docRef = await addDoc(collection(db, 'projects'), {
         ...projectsModel,
-        ...req.body,
+        ...req.query,
       })
 
-      res.send({ id: docRef.id })
+      res.send(req.query)
     } catch (e) {
       console.error('Error adding document: ', e)
       res.send({ status: 500 })
@@ -78,6 +82,24 @@ module.exports = {
     })
 
     res.send({ status: 200 })
+  },
+  updateProject: async (req, res, next) => {
+    try {
+      console.log('stuck')
+      // const { walletAddress } = req.body
+
+      // if (req.user) {
+      //   const ref = doc(db, 'users', req.user.id)
+      //   await updateDoc(ref, { walletAddress: walletAddress })
+      // }
+      // const { docId, newDataObject } = req.body
+      // const ref = doc(db, 'users', docId)
+      // await updateDoc(ref, newDataObject)
+
+      res.send({ status: 200 })
+    } catch {
+      res.send({ status: 500 })
+    }
   },
   test: async (req, res, next) => {
     try {
