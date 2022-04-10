@@ -28,6 +28,24 @@ module.exports = {
     }))
     res.send(list)
   },
+  getUserWithAllClaims: async (req, res, next) => {
+    if (req.user) {
+      const userClaimsRef = collection(db, 'userClaims')
+      const q = query(
+        userClaimsRef,
+        where('claimerUsername', '==', req.user.twitterUsername),
+      )
+      let projectClaims = []
+      const querySnapshot = await getDocs(q)
+      querySnapshot.forEach((doc) => {
+        projectClaims.push(doc.data())
+      })
+
+      res.send({ status: 200, data: req.user, projectClaims: projectClaims })
+    } else {
+      res.send({ status: 404 })
+    }
+  },
   getByUsername: async (req, res, next) => {
     const { username } = req.query
     const ref = collection(db, 'users')
@@ -79,8 +97,8 @@ module.exports = {
       projectCurrency,
       projectUsername,
       moneyPerThousandImpressions,
+      projectPicture,
     } = req.query // twitterUsername of project
-
     const impressionsPerMetricCount = 40 // estimated
 
     if (req.user) {
@@ -177,14 +195,16 @@ module.exports = {
             ...{
               projectId: projectId,
               claimerUsername: req.user.twitterUsername,
-              claimAmount: totalRewards,
+              totalAmountEarned: totalRewards,
               claimCurrency: projectCurrency,
+              projectPicture: projectPicture,
+              projectUserName: projectUsername,
             },
           })
         } else {
           const userClaimRef = doc(db, 'userClaims', userClaimId)
           await updateDoc(userClaimRef, {
-            claimAmount: increment(totalRewards),
+            totalAmountEarned: increment(totalRewards),
           })
         }
       }

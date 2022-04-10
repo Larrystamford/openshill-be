@@ -1,8 +1,11 @@
 const userClaimsModel = {
   projectId: '', // project document id
   claimerUsername: '',
-  claimAmount: 0, // when money transfered out from project fund minus this
   claimCurrency: '',
+  totalAmountEarned: 0, // virtual money
+  totalAmountClaimed: 0, // sent from contract to user
+  projectPicture: '',
+  projectUserName: '',
 }
 
 module.exports = { userClaimsModel }
