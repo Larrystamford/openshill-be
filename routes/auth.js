@@ -7,7 +7,7 @@ if (process.env.NODE_ENV !== 'production') {
 let CLIENT_URL =
   process.env.NODE_ENV !== 'production'
     ? 'http://localhost:3000/redirect'
-    : 'https://openshill.com/redirect'
+    : 'https://www.openshill.com/redirect'
 
 router.get('/login/success', (req, res) => {
   if (req.user) {
