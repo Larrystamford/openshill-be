@@ -17,8 +17,8 @@ const { projectsModel } = require('../models/projects')
 const Web3 = require('web3')
 // const Provider = require('@truffle/hdwallet-provider')
 const ethers = require('ethers')
-const TokenManager = require('../../frontend/src/contracts/TokenManager.json')
-const Weth = require('../../frontend/src/contracts/Weth.json')
+// const TokenManager = require('../../frontend/src/contracts/TokenManager.json')
+// const Weth = require('../../frontend/src/contracts/Weth.json')
 const adminAddress = '0xdeb03050e0503b634102718a45c456fe49484500'
 const fakePrivateKey =
   '4763cc2db21e2941a53aa316daf8e901c35ea2cc2f7f01dfbadd199fc4447273'
