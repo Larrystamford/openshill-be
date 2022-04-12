@@ -17,12 +17,17 @@ const {
 const { usersModel } = require('./models/users')
 const db = require('./firebase-config')
 
+const callbackURL =
+  process.env.NODE_ENV !== 'production'
+    ? 'http://localhost:5000/v1/auth/twitter/callback'
+    : 'https://api.openshill.com/v1/auth/twitter/callback'
+
 passport.use(
   new TwitterStrategy(
     {
       consumerKey: process.env.TWITTER_CONSUMER_KEY,
       consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-      callbackURL: '/v1/auth/twitter/callback',
+      callbackURL: callbackURL,
     },
     async (token, tokenSecret, profile, cb) => {
       let ref = collection(db, 'users')
