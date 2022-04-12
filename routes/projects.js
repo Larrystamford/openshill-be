@@ -9,6 +9,6 @@ router.route('/createProject').get(ProjectsController.createProject) // TODO: ch
 router.route('/getWhitelist').post(ProjectsController.addToWhitelist)
 router.route('/addToWhitelist').post(ProjectsController.addToWhitelist)
 router.route('/updateProject').put(ProjectsController.updateProject)
-router.route('/test').get(ProjectsController.test)
+// router.route('/test').get(ProjectsController.test)
 
 module.exports = router

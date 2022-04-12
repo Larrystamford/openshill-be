@@ -15,7 +15,7 @@ const {
 const { projectsModel } = require('../models/projects')
 
 const Web3 = require('web3')
-const Provider = require('@truffle/hdwallet-provider')
+// const Provider = require('@truffle/hdwallet-provider')
 const ethers = require('ethers')
 const TokenManager = require('../../frontend/src/contracts/TokenManager.json')
 const Weth = require('../../frontend/src/contracts/Weth.json')
@@ -101,31 +101,31 @@ module.exports = {
       res.send({ status: 500 })
     }
   },
-  test: async (req, res, next) => {
-    try {
-      const provider = new Provider(fakePrivateKey, 'http://localhost:9545')
-      const web3 = new Web3(provider)
-      let networkId = await web3.eth.net.getId()
+  // test: async (req, res, next) => {
+  //   try {
+  //     const provider = new Provider(fakePrivateKey, 'http://localhost:9545')
+  //     const web3 = new Web3(provider)
+  //     let networkId = await web3.eth.net.getId()
 
-      const tokenManager = new web3.eth.Contract(
-        TokenManager.abi,
-        TokenManager.networks[networkId].address,
-      )
+  //     const tokenManager = new web3.eth.Contract(
+  //       TokenManager.abi,
+  //       TokenManager.networks[networkId].address,
+  //     )
 
-      const receipt = await tokenManager.methods
-        .transferFromContract(
-          Weth.networks[networkId].address, // token address
-          '0x0D702F81a299d8A068E1498433070CAa0319dB69', // depositor
-          adminAddress, // transfer to this address
-          ethers.utils.parseEther('0.005'),
-        )
-        .send({ from: adminAddress })
-      console.log(`Transaction hash: ${receipt}`)
+  //     const receipt = await tokenManager.methods
+  //       .transferFromContract(
+  //         Weth.networks[networkId].address, // token address
+  //         '0x0D702F81a299d8A068E1498433070CAa0319dB69', // depositor
+  //         adminAddress, // transfer to this address
+  //         ethers.utils.parseEther('0.005'),
+  //       )
+  //       .send({ from: adminAddress })
+  //     console.log(`Transaction hash: ${receipt}`)
 
-      res.send({ id: 123 })
-    } catch (e) {
-      console.error('error: ', e)
-      res.send({ status: 500 })
-    }
-  },
+  //     res.send({ id: 123 })
+  //   } catch (e) {
+  //     console.error('error: ', e)
+  //     res.send({ status: 500 })
+  //   }
+  // },
 }
