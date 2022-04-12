@@ -27,7 +27,7 @@ app.use(passport.session())
 const originURL =
   process.env.NODE_ENV !== 'production'
     ? 'http://localhost:3000'
-    : 'https://openshill.com'
+    : 'https://www.openshill.com'
 
 app.use(
   cors({

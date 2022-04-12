@@ -16,6 +16,7 @@ const {
 const { usersModel } = require('../models/users')
 const { tweetsModel } = require('../models/tweets')
 const { userClaimsModel } = require('../models/userClaims')
+const { internalModel } = require('../models/internal')
 
 const axios = require('axios')
 
@@ -207,6 +208,11 @@ module.exports = {
             totalAmountEarned: increment(totalRewards),
           })
         }
+
+        const internalRef = doc(db, 'internal', 'vCvhxq2XsBUf4VCeCJU7')
+        await updateDoc(internalRef, {
+          totalVirtualClaim: increment(totalRewards),
+        })
       }
 
       res.send({ status: 200, rewards: totalRewards })
