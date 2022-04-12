@@ -1,7 +1,13 @@
 const router = require('express').Router()
 const passport = require('passport')
 
-const CLIENT_URL = 'http://localhost:3000/redirect'
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+let CLIENT_URL =
+  process.env.NODE_ENV !== 'production'
+    ? 'http://localhost:3000/redirect'
+    : 'https://openshill.com//redirect'
 
 router.get('/login/success', (req, res) => {
   if (req.user) {
