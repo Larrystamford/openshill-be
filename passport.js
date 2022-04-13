@@ -60,9 +60,6 @@ passport.use(
           twitterProfilePicBackground: undefineToString(
             profile._json.profile_banner_url,
           ),
-          walletsAddress: '',
-          amountEarned: 0,
-          amountClaimed: 0,
           location: undefineToString(profile._json.location),
           twitterDescription: undefineToString(profile._json.description),
         })
