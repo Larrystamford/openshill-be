@@ -22,6 +22,13 @@ const callbackURL =
     ? 'http://localhost:5000/v1/auth/twitter/callback'
     : 'https://api.openshill.com/v1/auth/twitter/callback'
 
+const undefineToString = (value) => {
+  if (value) {
+    return value
+  }
+  return ''
+}
+
 passport.use(
   new TwitterStrategy(
     {
@@ -44,29 +51,37 @@ passport.use(
       if (_.isEmpty(existingDoc)) {
         const docRef = await addDoc(collection(db, 'users'), {
           ...usersModel,
-          name: profile._json.name,
+          name: undefineToString(profile._json.name),
           twitterId: profile.id,
           twitterUsername: profile.username,
-          twitterProfilePic: profile._json.profile_image_url_https,
-          twitterProfilePicBackground: profile._json.profile_banner_url,
+          twitterProfilePic: undefineToString(
+            profile._json.profile_image_url_https,
+          ),
+          twitterProfilePicBackground: undefineToString(
+            profile._json.profile_banner_url,
+          ),
           walletsAddress: '',
           amountEarned: 0,
           amountClaimed: 0,
-          location: profile._json.location,
-          twitterDescription: profile._json.description,
+          location: undefineToString(profile._json.location),
+          twitterDescription: undefineToString(profile._json.description),
         })
         const docSnap = await getDoc(docRef) // get snapshot, docSnap.data() get data, docSnap.id get id
         existingDocId = docSnap.id
       } else {
         const ref = doc(db, 'users', existingDocId)
         await updateDoc(ref, {
-          name: profile._json.name,
+          name: undefineToString(profile._json.name),
           twitterId: profile.id,
           twitterUsername: profile.username,
-          twitterProfilePic: profile._json.profile_image_url_https,
-          twitterProfilePicBackground: profile._json.profile_banner_url,
-          location: profile._json.location,
-          twitterDescription: profile._json.description,
+          twitterProfilePic: undefineToString(
+            profile._json.profile_image_url_https,
+          ),
+          twitterProfilePicBackground: undefineToString(
+            profile._json.profile_banner_url,
+          ),
+          location: undefineToString(profile._json.location),
+          twitterDescription: undefineToString(profile._json.description),
         })
       }
 
