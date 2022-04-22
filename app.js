@@ -17,7 +17,7 @@ app.use(express.json())
 app.use(
   cookieSession({
     name: 'session',
-    keys: ['generateprivatekeys'],
+    keys: [process.env.COOKIE_SECRET],
     maxAge: 300 * 24 * 60 * 60 * 100,
   }),
 )

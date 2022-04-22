@@ -7,7 +7,7 @@ const projectsModel = {
   totalLifeTimeDeposit: 0, // sum every deposit
   totalLifeTimeWithdraw: 0, // minus every withdraw
   projectCurrency: '', // WETH
-  claims: [], // {claimingUser: "username", claimedAmount: 0.002, claimDate: "UTC string"}
+  claims: [], // latest 50 claims {claimingUser: "username", claimedAmount: 0.002, claimDate: "UTC string"}
   moneyPerThousandImpressions: 0,
 }
 

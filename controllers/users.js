@@ -16,7 +16,7 @@ const {
 const { usersModel } = require('../models/users')
 const { tweetsModel } = require('../models/tweets')
 const { userClaimsModel } = require('../models/userClaims')
-const { internalModel } = require('../models/internal')
+const { projectClaimsModel } = require('../models/projectClaims')
 
 const axios = require('axios')
 
@@ -64,6 +64,9 @@ module.exports = {
       const docRef = await addDoc(collection(db, 'users'), {
         ...usersModel,
         ...req.body,
+        // incase user try to hack fake money in
+        totalAmountEarned: 0,
+        totalAmountClaimed: 0,
       })
 
       res.send({ id: docRef.id })
@@ -72,6 +75,8 @@ module.exports = {
       res.send({ status: 500 })
     }
   },
+  // update user wallet address
+  // need to be careful not to let user update anything he wants
   updateUser: async (req, res, next) => {
     try {
       const { walletAddress } = req.body
@@ -92,6 +97,9 @@ module.exports = {
     res.send({ msg: 'Deleted' })
   },
   calculateRewards: async (req, res, next) => {
+    // TODO
+    // all these should be called in the backend when projectId is sent in
+    // also need to add check of whether the user has the nft belonging to the project id
     const {
       twitterUsername,
       projectId,
@@ -162,6 +170,7 @@ module.exports = {
         (totalImpressions / 1000) * moneyPerThousandImpressions
 
       if (totalRewards) {
+        // update project by id
         const projectRef = doc(db, 'projects', projectId)
         await updateDoc(projectRef, {
           claims: arrayUnion({
@@ -171,12 +180,27 @@ module.exports = {
           }),
         })
 
+        // to query claims for range queries
+        const projectClaimsRef = collection(db, 'projectClaims')
+        await addDoc(projectClaimsRef, {
+          ...projectClaimsModel,
+          ...{
+            projectId: projectId,
+            projectUsername: projectUsername,
+            claimingUsername: req.user.twitterUsername,
+            claimedAmount: totalRewards,
+            claimDate: Date.now(),
+            claimCurrency: projectCurrency,
+          },
+        })
+
+        // update the user model
         const userRef = doc(db, 'users', req.user.id)
         await updateDoc(userRef, {
           totalAmountEarned: increment(totalRewards),
         })
 
-        // check if tweet had already collected rewards or not
+        // check if tweet is first time collecting rewards or not
         const userClaimsRef = collection(db, 'userClaims')
         const q = query(
           userClaimsRef,
