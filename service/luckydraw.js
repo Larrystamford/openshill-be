@@ -17,6 +17,9 @@ const {
 } = require('firebase/firestore')
 const { luckyTweetsModel } = require('../models/luckyTweets')
 const { usersModel } = require('../models/users')
+const { userClaimsModel } = require('../models/userClaims')
+const { projectClaimsModel } = require('../models/projectClaims')
+
 const e = require('express')
 
 function randomIntFromInterval(min, max) {
@@ -132,8 +135,74 @@ function getLuckyDrawResult() {
   return finalPrize
 }
 
-async function storeLuckyDrawResult(result) {
-  console.log(result, 'storing')
+async function storeLuckyDrawResult(user, result, projectId, project) {
+  // update project by id
+  const projectRef = doc(db, 'projects', projectId)
+  await updateDoc(projectRef, {
+    claims: arrayUnion({
+      claimingUser: user.twitterUsername,
+      claimedAmount: result,
+      claimDate: Date.now(),
+    }),
+  })
+
+  // to query claims for range queries
+  const projectClaimsRef = collection(db, 'projectClaims')
+  await addDoc(projectClaimsRef, {
+    ...projectClaimsModel,
+    ...{
+      projectId: projectId,
+      projectUsername: project.username,
+      claimingUsername: user.twitterUsername,
+      claimedAmount: result,
+      claimDate: Date.now(),
+      claimCurrency: project.projectCurrency,
+    },
+  })
+
+  const userClaimsRef = collection(db, 'userClaims')
+  const q = query(
+    userClaimsRef,
+    where('projectId', '==', projectId),
+    where('claimerUsername', '==', user.twitterUsername),
+  )
+  let userClaimId = 0
+  const querySnapshot = await getDocs(q)
+  querySnapshot.forEach((doc) => {
+    userClaimId = doc.id
+  })
+
+  if (!userClaimId) {
+    // first time claiming for this project
+    await addDoc(collection(db, 'userClaims'), {
+      ...userClaimsModel,
+      ...{
+        projectId: projectId,
+        claimerUsername: user.twitterUsername,
+        totalAmountEarned: result,
+        claimCurrency: project.projectCurrency,
+        projectPicture: project.profilePicture,
+        projectUserName: project.username,
+      },
+    })
+  } else {
+    const userClaimRef = doc(db, 'userClaims', userClaimId)
+    await updateDoc(userClaimRef, {
+      totalAmountEarned: increment(result),
+    })
+  }
+
+  // update the user model
+  const userRef = doc(db, 'users', user.id)
+  await updateDoc(userRef, {
+    totalAmountEarned: increment(result),
+    numRaffleTickets: increment(-1),
+  })
+
+  const internalRef = doc(db, 'internal', 'vCvhxq2XsBUf4VCeCJU7')
+  await updateDoc(internalRef, {
+    totalVirtualClaim: increment(result),
+  })
 }
 
 module.exports = {

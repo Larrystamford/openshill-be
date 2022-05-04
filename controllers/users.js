@@ -5,6 +5,7 @@ const {
   addDoc,
   deleteDoc,
   setDoc,
+  getDoc,
   updateDoc,
   doc,
   query,
@@ -207,7 +208,7 @@ module.exports = {
           totalAmountEarned: increment(totalRewards),
         })
 
-        // check if tweet is first time collecting rewards or not
+        // check if user is first time collecting rewards from the project
         const userClaimsRef = collection(db, 'userClaims')
         const q = query(
           userClaimsRef,
@@ -262,8 +263,28 @@ module.exports = {
   },
 
   getLuckyDrawResult: async (req, res, next) => {
-    const amountWon = getLuckyDrawResult()
-    await storeLuckyDrawResult(amountWon)
-    res.send({ amountWon: amountWon })
+    // TODO: change to post request
+    const { projectId } = req.query // twitterUsername of project
+
+    let amountWon = 0
+    if (req.user) {
+      const ethUsdResponse = await axios.get(
+        'https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD',
+      )
+      usdPerEth = ethUsdResponse.data.USD
+
+      amountWonInEth = getLuckyDrawResult() / usdPerEth
+
+      const projectRef = doc(db, 'projects', projectId)
+      const projectSnap = await getDoc(projectRef)
+      await storeLuckyDrawResult(
+        req.user,
+        amountWonInEth,
+        projectId,
+        projectSnap.data(),
+      )
+    }
+
+    res.send({ amountWon: amountWonInEth })
   },
 }
