@@ -17,6 +17,11 @@ const { usersModel } = require('../models/users')
 const { tweetsModel } = require('../models/tweets')
 const { userClaimsModel } = require('../models/userClaims')
 const { projectClaimsModel } = require('../models/projectClaims')
+const {
+  getLuckyDrawTickets,
+  getLuckyDrawResult,
+  storeLuckyDrawResult,
+} = require('../service/luckydraw')
 
 const axios = require('axios')
 
@@ -100,6 +105,7 @@ module.exports = {
     // TODO
     // all these should be called in the backend when projectId is sent in
     // also need to add check of whether the user has the nft belonging to the project id
+    // move to service folder
     const {
       twitterUsername,
       projectId,
@@ -111,6 +117,7 @@ module.exports = {
     const impressionsPerMetricCount = 40 // estimated
 
     if (req.user) {
+      // get lastest 10 tweets
       const result = await axios.get(
         `https://api.twitter.com/2/users/${req.user.twitterId}/tweets?exclude=retweets&tweet.fields=public_metrics&max_results=10`,
         {
@@ -243,5 +250,20 @@ module.exports = {
     } else {
       res.send({ status: 404 })
     }
+  },
+
+  getLuckyDrawTickets: async (req, res, next) => {
+    let numberOfTickets = 0
+    if (req.user) {
+      numberOfTickets = await getLuckyDrawTickets(req.user)
+    }
+
+    res.send({ numberOfTickets: numberOfTickets })
+  },
+
+  getLuckyDrawResult: async (req, res, next) => {
+    const amountWon = getLuckyDrawResult()
+    await storeLuckyDrawResult(amountWon)
+    res.send({ amountWon: amountWon })
   },
 }

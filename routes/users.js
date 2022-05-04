@@ -10,4 +10,7 @@ router.route('/delete').get(UsersController.delete)
 
 router.route('/calculateRewards').get(UsersController.calculateRewards)
 
+router.route('/getLuckyDrawTickets').get(UsersController.getLuckyDrawTickets)
+router.route('/getLuckyDrawResult').get(UsersController.getLuckyDrawResult)
+
 module.exports = router
