@@ -42,8 +42,7 @@ async function getLuckyDrawTickets(user) {
 
   let totalTickets = 0
   let uniqueFriendsTagged = new Set()
-  //   const projectTwitterUsername = '@openshill_nft'
-  const projectTwitterUsername = '@los_muertosNFT'
+  const projectTwitterUsername = '@openshill_nft'
 
   for (const tweet of tweets) {
     // check if tweet had already collected rewards or not
