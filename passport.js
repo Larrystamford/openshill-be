@@ -43,6 +43,7 @@ passport.use(
       const querySnapshot = await getDocs(q)
       let existingDocId = ''
       let existingDoc = {}
+
       querySnapshot.forEach((doc) => {
         existingDocId = doc.id
         existingDoc = doc.data()
