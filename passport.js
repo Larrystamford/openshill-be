@@ -2,7 +2,6 @@ const TwitterStrategy = require('passport-twitter').Strategy
 const passport = require('passport')
 const _ = require('lodash/core')
 require('dotenv').config()
-const { initializeApp } = require('firebase-admin/app')
 
 const {
   collection,
