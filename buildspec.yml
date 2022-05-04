@@ -6,6 +6,6 @@ phases:
       # Install dependencies needed for running tests
       - npm install --save firebase
       - npm install
-      - npm install @truffle/hdwallet-provider
+      # - npm install @truffle/hdwallet-provider
       # Upgrade AWS CLI to the latest version
       - pip install --upgrade awscli
