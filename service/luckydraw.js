@@ -116,12 +116,12 @@ function getLuckyDrawResult() {
   const percentile70high = 10
   const percentile30low = 30
   const percentile30high = 50 // 50 usdc
-  const percentileSplit = 80 // if less than 70 percent will go to the 70low and 70 high
+  const percentileSplit = 90 // if less than 90 percent will go to the 70low and 70 high
 
   const percentChance = randomIntFromInterval(1, 100)
   const randomCents = Math.round(Math.random() * 100) / 100 // this sometimes gives 0.00999999 etc
 
-  // 80 percent chance to get 3-10
+  // 90 percent chance to get 3-10
   let finalPrize
   if (percentChance < percentileSplit) {
     finalPrize =
