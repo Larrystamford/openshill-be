@@ -38,8 +38,8 @@ module.exports = {
     let totalNewImpressions = 0
     for (const tweet of tweets) {
       if (
-        tweet.text.toLowerCase().includes(projectTwitterUsername) &&
-        tweet.text.toLowerCase().includes(hashtag)
+        tweet.text.toLowerCase().includes(projectTwitterUsername.toLowerCase()) &&
+        tweet.text.toLowerCase().includes(hashtag.toLowerCase())
       ) {
         const metric_count = Math.max(
           tweet.public_metrics.like_count,
