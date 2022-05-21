@@ -7,6 +7,7 @@ const projectClaims = {
   claimedAmount: '',
   claimDate: '', // UTC String
   claimCurrency: '', // WETH / USD etc
+  claimType: 'standard', // standard, lucky, competition
 }
 
 module.exports = { projectClaims }

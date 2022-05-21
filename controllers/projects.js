@@ -11,6 +11,8 @@ const {
   where,
   arrayUnion,
   arrayRemove,
+  orderBy,
+  limit,
 } = require('firebase/firestore')
 const { projectsModel } = require('../models/projects')
 
@@ -46,6 +48,66 @@ module.exports = {
       project.id = doc.id
     })
     res.send(project)
+  },
+  getTopUserClaims: async (req, res, next) => {
+    const { username } = req.query
+    const queryRef = collection(db, 'userClaims')
+    const q = query(
+      queryRef,
+      orderBy('totalAmountEarned', 'desc'),
+      limit(50),
+      where('projectUserName', '==', username),
+    )
+
+    const topUserClaims = []
+    const querySnapshot = await getDocs(q)
+    querySnapshot.forEach((doc) => {
+      topUserClaims.push({
+        userClaimId: doc.id,
+        ...doc.data(),
+      })
+    })
+    res.send(topUserClaims)
+  },
+  getCompoundCompetitonClaims: async (req, res, next) => {
+    const { username } = req.query
+    const queryRef = collection(db, 'competitionCompoundClaim')
+    const q = query(
+      queryRef,
+      orderBy('claimedPoints', 'desc'),
+      limit(50),
+      where('projectUserName', '==', username),
+    )
+
+    const topUserClaims = []
+    const querySnapshot = await getDocs(q)
+    querySnapshot.forEach((doc) => {
+      topUserClaims.push({
+        id: doc.id,
+        ...doc.data(),
+      })
+    })
+    res.send(topUserClaims)
+  },
+  getIndividualCompetitonClaims: async (req, res, next) => {
+    const { username } = req.query
+    const queryRef = collection(db, 'competitionIndividualClaims')
+    const q = query(
+      queryRef,
+      orderBy('claimDate', 'desc'),
+      limit(50),
+      where('projectUserName', '==', username),
+    )
+
+    const latestUserClaims = []
+    const querySnapshot = await getDocs(q)
+    querySnapshot.forEach((doc) => {
+      latestUserClaims.push({
+        id: doc.id,
+        ...doc.data(),
+      })
+    })
+    res.send(latestUserClaims)
   },
   createProject: async (req, res, next) => {
     try {

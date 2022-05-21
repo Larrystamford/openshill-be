@@ -19,10 +19,18 @@ const { tweetsModel } = require('../models/tweets')
 const { userClaimsModel } = require('../models/userClaims')
 const { projectClaimsModel } = require('../models/projectClaims')
 const {
+  competitionIndividualClaimModel,
+} = require('../models/competitionIndividualClaims')
+const {
+  competitionCompoundClaimModel,
+} = require('../models/competitionCompoundClaim')
+const {
   getLuckyDrawTickets,
   getLuckyDrawResult,
   storeLuckyDrawResult,
 } = require('../service/luckydraw')
+
+const RewardsService = require('../service/rewards')
 
 const axios = require('axios')
 
@@ -103,79 +111,29 @@ module.exports = {
     res.send({ msg: 'Deleted' })
   },
   calculateRewards: async (req, res, next) => {
-    // TODO
-    // all these should be called in the backend when projectId is sent in
-    // also need to add check of whether the user has the nft belonging to the project id
-    // move to service folder
-    const {
-      twitterUsername,
-      projectId,
-      projectCurrency,
-      projectUsername,
-      moneyPerThousandImpressions,
-      projectPicture,
-    } = req.query // twitterUsername of project
-    const impressionsPerMetricCount = 40 // estimated
+    const { projectUsername } = req.query
 
     if (req.user) {
-      // get lastest 10 tweets
-      const result = await axios.get(
-        `https://api.twitter.com/2/users/${req.user.twitterId}/tweets?exclude=retweets&tweet.fields=public_metrics&max_results=10`,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
-          },
-        },
+      const {
+        projectId,
+        moneyPerThousandImpressions,
+        twitterUsername,
+        projectCurrency,
+        bannerPicture,
+        profilePicture,
+        claimType,
+        username,
+      } = await RewardsService.getProjectDetailsByProjectUsername(
+        projectUsername,
       )
-      const tweets = result.data.data
 
-      let totalImpressions = 0
-      for (const tweet of tweets) {
-        if (tweet.text.includes(twitterUsername)) {
-          const metric_count = Math.max(
-            tweet.public_metrics.like_count,
-            tweet.public_metrics.retweet_count,
-            tweet.public_metrics.reply_count,
-            tweet.public_metrics.quote_count,
-          )
-
-          let impressions = impressionsPerMetricCount * metric_count
-
-          // check if tweet had already collected rewards or not
-          const ref = collection(db, 'tweets')
-          const q = query(ref, where('tweetId', '==', tweet.id))
-          let tweetImpressionsCounted = 0
-          let tweetDocId = 0
-          const querySnapshot = await getDocs(q)
-          querySnapshot.forEach((doc) => {
-            tweetDocId = doc.id
-            tweetImpressionsCounted = doc.data().impressionsCounted
-          })
-
-          if (tweetImpressionsCounted === 0) {
-            // tweet not collected before
-            await addDoc(collection(db, 'tweets'), {
-              ...tweetsModel,
-              ...{ tweetId: tweet.id, impressionsCounted: impressions },
-            })
-          } else {
-            impressions -= tweetImpressionsCounted
-            if (impressions > 0 && tweetDocId) {
-              const tweetRef = doc(db, 'tweets', tweetDocId)
-              await updateDoc(tweetRef, {
-                impressionsCounted: increment(impressions),
-              })
-            }
-          }
-
-          if (impressions > 0) {
-            totalImpressions += impressions
-          }
-        }
-      }
+      const totalNewImpressions = await RewardsService.getTotalNewImpressions(
+        req,
+        twitterUsername,
+      )
 
       const totalRewards =
-        (totalImpressions / 1000) * moneyPerThousandImpressions
+        (totalNewImpressions / 1000) * moneyPerThousandImpressions
 
       if (totalRewards) {
         // update project by id
@@ -230,14 +188,16 @@ module.exports = {
               claimerUsername: req.user.twitterUsername,
               totalAmountEarned: totalRewards,
               claimCurrency: projectCurrency,
-              projectPicture: projectPicture,
+              projectPicture: profilePicture,
               projectUserName: projectUsername,
+              claimDate: Date.now(),
             },
           })
         } else {
           const userClaimRef = doc(db, 'userClaims', userClaimId)
           await updateDoc(userClaimRef, {
             totalAmountEarned: increment(totalRewards),
+            claimDate: Date.now(),
           })
         }
 
@@ -248,6 +208,101 @@ module.exports = {
       }
 
       res.send({ status: 200, rewards: totalRewards })
+    } else {
+      res.send({ status: 404 })
+    }
+  },
+  calculateCompetitionPoints: async (req, res, next) => {
+    const { projectUsername } = req.query
+
+    if (req.user) {
+      const {
+        projectId,
+        moneyPerThousandImpressions,
+        twitterUsername,
+        projectCurrency,
+        bannerPicture,
+        profilePicture,
+        claimType,
+        username,
+      } = await RewardsService.getProjectDetailsByProjectUsername(
+        projectUsername,
+      )
+
+      const totalNewImpressions = await RewardsService.getTotalNewImpressions(
+        req,
+        twitterUsername,
+        '#openshill_nft',
+      )
+
+      if (totalNewImpressions) {
+        // to query claims for range queries
+        const competitionIndividualClaimModelRef = collection(
+          db,
+          'competitionIndividualClaims',
+        )
+        await addDoc(competitionIndividualClaimModelRef, {
+          ...competitionIndividualClaimModel,
+          ...{
+            projectId: projectId,
+            projectUsername: projectUsername,
+            claimerUsername: req.user.twitterUsername,
+            claimedPoints: totalNewImpressions,
+            claimDate: Date.now(),
+          },
+        })
+
+        // update the user model
+        const userRef = doc(db, 'users', req.user.id)
+        await updateDoc(userRef, {
+          totalShillPoints: increment(totalNewImpressions),
+        })
+
+        // check if user is first time collecting rewards from the project
+        const competitionCompoundClaimModelRef = collection(
+          db,
+          'competitionCompoundClaim',
+        )
+        const q = query(
+          competitionCompoundClaimModelRef,
+          where('projectId', '==', projectId),
+          where('claimerUsername', '==', req.user.twitterUsername),
+        )
+        let competitionCompoundClaimDocId = 0
+        const querySnapshot = await getDocs(q)
+        querySnapshot.forEach((doc) => {
+          competitionCompoundClaimDocId = doc.id
+        })
+
+        if (!competitionCompoundClaimDocId) {
+          // first time claiming for this project
+          await addDoc(collection(db, 'competitionCompoundClaim'), {
+            ...competitionCompoundClaimModel,
+            ...{
+              projectId: projectId,
+              claimerUsername: req.user.twitterUsername,
+              claimedPoints: totalNewImpressions,
+              projectPicture: profilePicture,
+              projectUserName: projectUsername,
+              claimDate: Date.now(),
+            },
+          })
+        } else {
+          const competitionClaimRef = doc(
+            db,
+            'competitionCompoundClaim',
+            competitionCompoundClaimDocId,
+          )
+          await updateDoc(competitionClaimRef, {
+            claimedPoints: increment(totalNewImpressions),
+            claimDate: Date.now(),
+          })
+        }
+      }
+
+      console.log('hi', totalNewImpressions)
+
+      res.send({ status: 200, totalNewImpressions: totalNewImpressions })
     } else {
       res.send({ status: 404 })
     }

@@ -182,12 +182,14 @@ async function storeLuckyDrawResult(user, result, projectId, project) {
         claimCurrency: project.projectCurrency,
         projectPicture: project.profilePicture,
         projectUserName: project.username,
+        claimDate: Date.now(),
       },
     })
   } else {
     const userClaimRef = doc(db, 'userClaims', userClaimId)
     await updateDoc(userClaimRef, {
       totalAmountEarned: increment(result),
+      claimDate: Date.now(),
     })
   }
 

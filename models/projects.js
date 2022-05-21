@@ -9,6 +9,7 @@ const projectsModel = {
   projectCurrency: '', // WETH
   claims: [], // latest 50 claims {claimingUser: "username", claimedAmount: 0.002, claimDate: "UTC string"}
   moneyPerThousandImpressions: 0,
+  claimType: 'standard', // standard, lucky, competition
 }
 
 module.exports = { projectsModel }

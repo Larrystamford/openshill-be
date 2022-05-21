@@ -6,6 +6,8 @@ const userClaimsModel = {
   totalAmountClaimed: 0, // sent from contract to user
   projectPicture: '',
   projectUserName: '',
+  claimDate: '', // UTC String
+  claimType: 'standard', // standard, lucky, competition
 }
 
 module.exports = { userClaimsModel }

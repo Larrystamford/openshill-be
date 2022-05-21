@@ -9,6 +9,7 @@ router.route('/updateUser').put(UsersController.updateUser)
 router.route('/delete').get(UsersController.delete)
 
 router.route('/calculateRewards').get(UsersController.calculateRewards)
+router.route('/calculateCompetitionPoints').get(UsersController.calculateCompetitionPoints)
 
 router.route('/getLuckyDrawTickets').get(UsersController.getLuckyDrawTickets)
 router.route('/getLuckyDrawResult').get(UsersController.getLuckyDrawResult)
