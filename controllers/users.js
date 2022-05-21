@@ -232,7 +232,7 @@ module.exports = {
       const totalNewImpressions = await RewardsService.getTotalNewImpressions(
         req,
         twitterUsername,
-        '#openshill_nft',
+        'openshill_nft',
       )
 
       if (totalNewImpressions) {
